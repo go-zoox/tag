@@ -47,7 +47,7 @@ func (t *Tag) decodeR(ptr interface{}, keyPathParent string) error {
 		// fmt.Println("typ:", xkey, xalias, xtype.String())
 
 		attribute := attribute.New(rtt.Name, rtt.Type.String(), keyPathParent, rtt.Tag.Get(tagName))
-		fmt.Println("key:", attribute.GetKey())
+		// fmt.Println("key:", attribute.GetKey())
 		if err := attribute.SetValue(dataSource.Get(attribute.GetKey())); err != nil {
 			return err
 		}
