@@ -79,6 +79,7 @@ func (a *Attribute) SetValue(value interface{}) (err error) {
 
 // SetValue sets the value of the attribute.
 func (a *Attribute) setValueString(value string) (err error) {
+	fmt.Println("setValueString:", value, a.GetKey())
 	if strings.Index(a.Type, "struct") != -1 {
 		return fmt.Errorf("type is struct, can't set with string value(%s)", value)
 	}
@@ -114,7 +115,9 @@ func (a *Attribute) setValueString(value string) (err error) {
 			return fmt.Errorf("%s must be matched with regexp(%s), but empty", a.GetKey(), a.RegExp)
 		}
 
-		// a.Value = value // empty string
+		if a.Value == nil {
+			a.Value = value // empty string
+		}
 	} else {
 		// value is not empty
 		// 1. check enum
@@ -180,19 +183,32 @@ func (a *Attribute) setValueString(value string) (err error) {
 	case "string":
 		// do nothing
 	case "float64":
-		a.Value, err = strconv.ParseFloat(a.Value.(string), 64)
-		if err != nil {
-			return fmt.Errorf("%s is not float", a.Key)
+		if a.Value == "" {
+			a.Value = float64(0)
+		} else {
+			a.Value, err = strconv.ParseFloat(a.Value.(string), 64)
+			if err != nil {
+				return fmt.Errorf("%s is not float", a.Key)
+			}
 		}
 	case "int", "int8", "int16", "int32", "int64", "uint", "uint8", "uint16", "uint32", "uint64":
-		a.Value, err = strconv.ParseInt(a.Value.(string), 10, 64)
-		if err != nil {
-			return fmt.Errorf("%s is not int", a.Key)
+		if a.Value == "" {
+			a.Value = int64(0)
+		} else {
+			a.Value, err = strconv.ParseInt(a.Value.(string), 10, 64)
+			if err != nil {
+				return fmt.Errorf("%s is not int", a.Key)
+			}
 		}
+
 	case "bool":
-		a.Value, err = strconv.ParseBool(a.Value.(string))
-		if err != nil {
-			return fmt.Errorf("%s is not bool", a.Key)
+		if a.Value == "" {
+			a.Value = false
+		} else {
+			a.Value, err = strconv.ParseBool(a.Value.(string))
+			if err != nil {
+				return fmt.Errorf("%s is not bool", a.Key)
+			}
 		}
 	default:
 		a.Value = nil
