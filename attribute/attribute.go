@@ -79,7 +79,7 @@ func (a *Attribute) SetValue(value interface{}) (err error) {
 
 // SetValue sets the value of the attribute.
 func (a *Attribute) setValueString(value string) (err error) {
-	fmt.Println("setValueString:", value, a.GetKey())
+	// fmt.Println("setValueString:", value, a.GetKey())
 	if strings.Index(a.Type, "struct") != -1 {
 		return fmt.Errorf("type is struct, can't set with string value(%s)", value)
 	}
