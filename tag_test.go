@@ -1,8 +1,9 @@
 package tag
 
 import (
-	"strings"
 	"testing"
+
+	"github.com/go-zoox/core-utils/object"
 )
 
 type TestStruct struct {
@@ -30,28 +31,7 @@ var TestStructDataSourceData = map[string]interface{}{
 }
 
 func (t *TestStructDataSource) Get(key string) interface{} {
-	if strings.Contains(key, ".") {
-		keys := strings.Split(key, ".")
-		keyLength := len(keys)
-		tmp := TestStructDataSourceData
-		for index, k := range keys {
-			if v, ok := tmp[k]; ok {
-				if index == keyLength-1 {
-					return v
-				}
-
-				tmp = v.(map[string]interface{})
-			} else {
-				return nil
-			}
-		}
-	} else {
-		if v, ok := TestStructDataSourceData[key]; ok {
-			return v
-		}
-	}
-
-	return nil
+	return object.Get(TestStructDataSourceData, key)
 }
 
 func TestTag(t *testing.T) {
