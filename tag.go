@@ -5,17 +5,17 @@ import (
 	"reflect"
 
 	"github.com/go-zoox/tag/attribute"
-	typ "github.com/go-zoox/tag/type"
+	"github.com/go-zoox/tag/datasource"
 )
 
 // Tag is a struct tag parser and decoder
 type Tag struct {
 	Name       string
-	DataSource typ.DataSource
+	DataSource datasource.DataSource
 }
 
 // New creates a new Tag
-func New(name string, dataSource typ.DataSource) *Tag {
+func New(name string, dataSource datasource.DataSource) *Tag {
 	return &Tag{
 		Name:       name,
 		DataSource: dataSource,
