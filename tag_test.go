@@ -12,9 +12,10 @@ type TestStruct struct {
 	// Age      int
 	Redis struct {
 		IP   string `custom_struct_tag:"ip"`
-		Port int    `custom_struct_tag:"port"`
+		Port int64  `custom_struct_tag:"port"`
 		// Port int64  `custom_struct_tag:"port"`
 	} `custom_struct_tag:"redis"`
+	Ports []int64 `custom_struct_tag:"ports"`
 }
 
 type TestStructDataSource struct {
@@ -27,6 +28,10 @@ var TestStructDataSourceData = map[string]interface{}{
 		"ip":   "127.0.0.1",
 		"port": "6739",
 		// "port": 6739,
+	},
+	"ports": []int64{
+		6739,
+		6740,
 	},
 }
 
