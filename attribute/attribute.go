@@ -53,6 +53,14 @@ func (a *Attribute) GetValue() interface{} {
 
 // SetValue sets the value of the attribute.
 func (a *Attribute) SetValue(value interface{}) (err error) {
+	if value == nil {
+		if a.Default != "" {
+			value = a.Default
+		} else {
+			value = ""
+		}
+	}
+
 	if !a.isValueSetted {
 		a.isValueSetted = true
 	}
@@ -275,7 +283,7 @@ func (a *Attribute) setValueFloat(value float64) (err error) {
 //  LogLevel string `ini:"log_level,default=DEBUG"`
 //  Secret  string 	`ini:"secret,min=8,max=16"`
 //  Type 		string 	`ini:"type,enum=male|female"`
-//	RegExp  string  `ini:"regexp,re=/xxx/"`
+//	RegExp  string  `ini:"regexp,regexp=/xxx/"`
 // }
 //
 // key: AppName
