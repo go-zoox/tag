@@ -13,6 +13,22 @@ To install the package, run:
 go get github.com/go-zoox/tag
 ```
 
+## Features
+* [x] Type Validation
+  * [x] `omitempty`, such as `tag:"app_name,omitempty"`
+  * [x] `required`, such as `tag:"app_name,required"`
+  * [x] `default`, such as `tag:"app_name,default=my_app"`
+  * [x] `enum`, such as `tag:"app_name,enum=my_app|my_app2"`
+  * [x] `regexp`, such as `tag:"app_name,regexp=/^[a-zA-Z0-9_]+$/`
+  * [x] `min`, such as `tag:"app_name,min=1`
+    * if type is `string`, means the length of string
+    * if type is `int64`, means the minimum value of int
+  * [x] `max`, such as `tag:"app_name,max=10`
+    * if type is `string`, means the length of string
+    * if type is `int64`, means the maximum value of int
+* [x] Auto Type Transform
+
+
 ## Getting Started
 
 ```go

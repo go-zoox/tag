@@ -34,6 +34,7 @@ var TestStructDataSourceData = map[string]interface{}{
 		6739,
 		6740,
 	},
+	"type_transform": "666",
 }
 
 func (t *TestStructDataSource) Get(key string) interface{} {
@@ -142,5 +143,18 @@ func TestStringEnum(t *testing.T) {
 
 	if err := New("custom_struct_tag", &TestStructDataSource{}).Decode(&test); err == nil {
 		t.Error("should be error, but got nil")
+	}
+}
+
+func TestTypeTransform(t *testing.T) {
+	var test struct {
+		TypeTransform int64 `custom_struct_tag:"type_transform"`
+	}
+	if err := New("custom_struct_tag", &TestStructDataSource{}).Decode(&test); err != nil {
+		t.Error(err)
+	}
+
+	if test.TypeTransform != 666 {
+		t.Errorf("TypeTransform should be 666, but got %d", test.TypeTransform)
 	}
 }
