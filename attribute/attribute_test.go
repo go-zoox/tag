@@ -18,7 +18,7 @@ func TestEmpty(t *testing.T) {
 		t.Errorf("SetValue() should not return error, but got %s", err)
 	}
 
-	if a.GetValue() != nil {
+	if a.GetValue() != "" {
 		t.Errorf("GetValue() should be empty, but got %s", a.GetValue())
 	}
 
@@ -45,7 +45,7 @@ func TestAlias(t *testing.T) {
 		t.Errorf("SetValue() should not return error, but got %s", err)
 	}
 
-	if a.GetValue() != nil {
+	if a.GetValue() != "" {
 		t.Errorf("GetValue() should be empty, but got %s", a.GetValue())
 	}
 
@@ -72,7 +72,7 @@ func TestOmitEmpty(t *testing.T) {
 		t.Errorf("SetValue() should not return error, but got %s", err)
 	}
 
-	if a.GetValue() != nil {
+	if a.GetValue() != "" {
 		t.Errorf("GetValue() should be empty, but got %s", a.GetValue())
 	}
 
