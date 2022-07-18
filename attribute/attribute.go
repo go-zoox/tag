@@ -57,7 +57,11 @@ func (a *Attribute) SetValue(value interface{}) (err error) {
 		if a.Default != "" {
 			value = a.Default
 		} else {
-			value = ""
+			if strings.Contains(a.Type, "struct") {
+				//
+			} else {
+				value = ""
+			}
 		}
 	}
 
