@@ -2,3 +2,5 @@ github.com/go-zoox/core-utils v1.0.1 h1:kErCUT+w5qZuaAAxP5HjLMS3lqJB+VGio8XCcXVO
 github.com/go-zoox/core-utils v1.0.1/go.mod h1:EknM3KLL6/kagL95wZbWE7mRRcYCG/fHqiJ/EH0ihAs=
 github.com/go-zoox/core-utils v1.0.4 h1:hkED3IlciYfTYnk7LrO+lBGC/+I1KSjQpJL6+K1v7Rg=
 github.com/go-zoox/core-utils v1.0.4/go.mod h1:EknM3KLL6/kagL95wZbWE7mRRcYCG/fHqiJ/EH0ihAs=
+github.com/go-zoox/core-utils v1.0.13 h1:aI20hoVvPjVfJSgy01XUliEdIvvMmdlvEcrXBg7Pbkc=
+github.com/go-zoox/core-utils v1.0.13/go.mod h1:EknM3KLL6/kagL95wZbWE7mRRcYCG/fHqiJ/EH0ihAs=

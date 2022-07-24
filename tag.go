@@ -75,9 +75,9 @@ func (t *Tag) setValue(rt reflect.Type, rv reflect.Value, attribute *attribute.A
 	case reflect.Bool:
 		rv.SetBool(value.(bool))
 
-	case reflect.Int64:
+	case reflect.Int64, reflect.Int, reflect.Int8, reflect.Int16, reflect.Int32:
 		if err := t.setValueInt(rv, value); err != nil {
-			return err
+			return fmt.Errorf("setValueInt error at key %s, expect type(%s) (detail: %s)", attribute.GetKey(), rv.Kind(), err)
 		}
 
 	case reflect.Float64, reflect.Float32:
@@ -97,7 +97,7 @@ func (t *Tag) setValue(rt reflect.Type, rv reflect.Value, attribute *attribute.A
 			return err
 		}
 
-	case reflect.Int, reflect.Int8, reflect.Int16, reflect.Int32, reflect.Uint, reflect.Uint8, reflect.Uint16, reflect.Uint32, reflect.Uint64:
+	case reflect.Uint, reflect.Uint8, reflect.Uint16, reflect.Uint32, reflect.Uint64:
 		if err := t.setValueInt(rv, value); err != nil {
 			return fmt.Errorf("setValueInt error at key %s, expect type(%s) (detail: %s)", attribute.GetKey(), rv.Kind(), err)
 		}
@@ -112,27 +112,88 @@ func (t *Tag) setValue(rt reflect.Type, rv reflect.Value, attribute *attribute.A
 func (t *Tag) setValueInt(rv reflect.Value, value any) error {
 	switch v := value.(type) {
 	case int64:
-		rv.SetInt(v)
+		switch rv.Kind() {
+		case reflect.Uint, reflect.Uint8, reflect.Uint16, reflect.Uint32, reflect.Uint64:
+			rv.SetUint(uint64(v))
+		default:
+			rv.SetInt(v)
+		}
+
 	case int:
-		rv.SetInt(int64(v))
+		switch rv.Kind() {
+		case reflect.Uint, reflect.Uint8, reflect.Uint16, reflect.Uint32, reflect.Uint64:
+			rv.SetUint(uint64(v))
+		default:
+			rv.SetInt(int64(v))
+		}
+
 	case float32:
 		rv.SetFloat(float64(v))
+
 	case int8:
-		rv.SetInt(int64(v))
+		switch rv.Kind() {
+		case reflect.Uint, reflect.Uint8, reflect.Uint16, reflect.Uint32, reflect.Uint64:
+			rv.SetUint(uint64(v))
+		default:
+			rv.SetInt(int64(v))
+		}
+
 	case int16:
-		rv.SetInt(int64(v))
+		switch rv.Kind() {
+		case reflect.Uint, reflect.Uint8, reflect.Uint16, reflect.Uint32, reflect.Uint64:
+			rv.SetUint(uint64(v))
+		default:
+			rv.SetInt(int64(v))
+		}
+
 	case int32:
-		rv.SetInt(int64(v))
+		switch rv.Kind() {
+		case reflect.Uint, reflect.Uint8, reflect.Uint16, reflect.Uint32, reflect.Uint64:
+			rv.SetUint(uint64(v))
+		default:
+			rv.SetInt(int64(v))
+		}
+
 	case uint:
-		rv.SetInt(int64(v))
+		switch rv.Kind() {
+		case reflect.Uint, reflect.Uint8, reflect.Uint16, reflect.Uint32, reflect.Uint64:
+			rv.SetUint(uint64(v))
+		default:
+			rv.SetInt(int64(v))
+		}
+
 	case uint8:
-		rv.SetInt(int64(v))
+		switch rv.Kind() {
+		case reflect.Uint, reflect.Uint8, reflect.Uint16, reflect.Uint32, reflect.Uint64:
+			rv.SetUint(uint64(v))
+		default:
+			rv.SetInt(int64(v))
+		}
+
 	case uint16:
-		rv.SetInt(int64(v))
+		switch rv.Kind() {
+		case reflect.Uint, reflect.Uint8, reflect.Uint16, reflect.Uint32, reflect.Uint64:
+			rv.SetUint(uint64(v))
+		default:
+			rv.SetInt(int64(v))
+		}
+
 	case uint32:
-		rv.SetInt(int64(v))
+		switch rv.Kind() {
+		case reflect.Uint, reflect.Uint8, reflect.Uint16, reflect.Uint32, reflect.Uint64:
+			rv.SetUint(uint64(v))
+		default:
+			rv.SetInt(int64(v))
+		}
+
 	case uint64:
-		rv.SetInt(int64(v))
+		switch rv.Kind() {
+		case reflect.Uint, reflect.Uint8, reflect.Uint16, reflect.Uint32, reflect.Uint64:
+			rv.SetUint(uint64(v))
+		default:
+			rv.SetInt(int64(v))
+		}
+
 	default:
 		return fmt.Errorf("setValueInt unknown value type: %s", reflect.TypeOf(value).Kind())
 	}

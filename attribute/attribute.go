@@ -113,13 +113,13 @@ func (a *Attribute) setValueString(value string) (err error) {
 		if a.Min != 0 || a.Max != 0 {
 			if a.Type == "string" {
 				return fmt.Errorf("%s must be in range(%d, %d), but empty", a.GetKey(), int(a.Min), int(a.Max))
-			} else {
-				switch a.Type {
-				case "int", "int8", "int16", "int32", "int64", "uint", "uint8", "uint16", "uint32", "uint64":
-					return fmt.Errorf("%s must be in range(%d, %d), but empty", a.GetKey(), int(a.Min), int(a.Max))
-				case "float", "float32", "float64":
-					return fmt.Errorf("%s must be in range(%f, %f), but empty", a.GetKey(), a.Min, a.Max)
-				}
+			}
+
+			switch a.Type {
+			case "int", "int8", "int16", "int32", "int64", "uint", "uint8", "uint16", "uint32", "uint64":
+				return fmt.Errorf("%s must be in range(%d, %d), but empty", a.GetKey(), int(a.Min), int(a.Max))
+			case "float", "float32", "float64":
+				return fmt.Errorf("%s must be in range(%f, %f), but empty", a.GetKey(), a.Min, a.Max)
 			}
 		}
 

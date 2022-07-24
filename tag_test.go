@@ -148,7 +148,11 @@ func TestStringEnum(t *testing.T) {
 
 func TestTypeTransform(t *testing.T) {
 	var test struct {
-		TypeTransform int64 `custom_struct_tag:"type_transform"`
+		TypeTransform       int64  `custom_struct_tag:"type_transform"`
+		TypeTransformInt    int    `custom_struct_tag:"type_transform"`
+		TypeTransformUInt   uint   `custom_struct_tag:"type_transform"`
+		TypeTransformUInt32 uint32 `custom_struct_tag:"type_transform"`
+		TypeTransformUInt64 uint64 `custom_struct_tag:"type_transform"`
 	}
 	if err := New("custom_struct_tag", &TestStructDataSource{}).Decode(&test); err != nil {
 		t.Error(err)
@@ -156,5 +160,21 @@ func TestTypeTransform(t *testing.T) {
 
 	if test.TypeTransform != 666 {
 		t.Errorf("TypeTransform should be 666, but got %d", test.TypeTransform)
+	}
+
+	if test.TypeTransformInt != 666 {
+		t.Errorf("TypeTransformInt should be 666, but got %d", test.TypeTransformInt)
+	}
+
+	if test.TypeTransformUInt != 666 {
+		t.Errorf("TypeTransformInt should be 666, but got %d", test.TypeTransformUInt)
+	}
+
+	if test.TypeTransformUInt32 != 666 {
+		t.Errorf("TypeTransformInt should be 666, but got %d", test.TypeTransformUInt32)
+	}
+
+	if test.TypeTransformUInt64 != 666 {
+		t.Errorf("TypeTransformInt should be 666, but got %d", test.TypeTransformUInt64)
 	}
 }
