@@ -80,9 +80,9 @@ func (t *Tag) setValue(rt reflect.Type, rv reflect.Value, attribute *attribute.A
 			return err
 		}
 
-	case reflect.Float64:
+	case reflect.Float64, reflect.Float32:
 		if err := t.setValueFloat(rv, value); err != nil {
-			return err
+			return fmt.Errorf("setValueFloat error at key %s, expect type(%s) (detail: %s)", attribute.GetKey(), rv.Kind(), err)
 		}
 
 	case reflect.Struct:
@@ -98,10 +98,9 @@ func (t *Tag) setValue(rt reflect.Type, rv reflect.Value, attribute *attribute.A
 		}
 
 	case reflect.Int, reflect.Int8, reflect.Int16, reflect.Int32, reflect.Uint, reflect.Uint8, reflect.Uint16, reflect.Uint32, reflect.Uint64:
-		return fmt.Errorf("type(%s) is not supported at %s, please int64", rv.Kind(), attribute.GetKey())
-
-	case reflect.Float32:
-		return fmt.Errorf("type(%s) is not supported at %s, please float64", rv.Kind(), attribute.GetKey())
+		if err := t.setValueInt(rv, value); err != nil {
+			return fmt.Errorf("setValueInt error at key %s, expect type(%s) (detail: %s)", attribute.GetKey(), rv.Kind(), err)
+		}
 
 	default:
 		return fmt.Errorf("type(%s) is not supported at %s, fatal err", rv.Kind(), attribute.GetKey())
