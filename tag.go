@@ -97,6 +97,11 @@ func (t *Tag) setValue(rt reflect.Type, rv reflect.Value, attribute *attribute.A
 			return err
 		}
 
+	case reflect.Map:
+		if err := t.setValueMap(rt, rv, value, attribute); err != nil {
+			return err
+		}
+
 	case reflect.Uint, reflect.Uint8, reflect.Uint16, reflect.Uint32, reflect.Uint64:
 		if err := t.setValueInt(rv, value); err != nil {
 			return fmt.Errorf("setValueInt error at key %s, expect type(%s) (detail: %s)", attribute.GetKey(), rv.Kind(), err)
@@ -254,6 +259,22 @@ func (t *Tag) setValueSlice(rt reflect.Type, rv reflect.Value, value any, attrib
 			rv.Set(reflect.Append(rv, value.Elem()))
 		}
 	}
+
+	return nil
+}
+
+func (t *Tag) setValueMap(rt reflect.Type, rv reflect.Value, value any, attribute *attribute.Attribute) error {
+	// support map[string]any
+	rv.Set(reflect.ValueOf(value))
+
+	// @TODO support map[string]T
+	//	such as map[string]string
+	//
+	// fmt.Println("attribute.Key:", attribute.Key, rt)
+	// f := rv.FieldByName(attribute.Key)
+	// switch v := value.(type) {
+	// case rt:
+	// }
 
 	return nil
 }
