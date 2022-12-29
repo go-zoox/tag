@@ -265,16 +265,34 @@ func (t *Tag) setValueSlice(rt reflect.Type, rv reflect.Value, value any, attrib
 
 func (t *Tag) setValueMap(rt reflect.Type, rv reflect.Value, value any, attribute *attribute.Attribute) error {
 	// support map[string]any
-	rv.Set(reflect.ValueOf(value))
+	// rv.Set(reflect.ValueOf(value))
 
 	// @TODO support map[string]T
 	//	such as map[string]string
-	//
-	// fmt.Println("attribute.Key:", attribute.Key, rt)
-	// f := rv.FieldByName(attribute.Key)
-	// switch v := value.(type) {
-	// case rt:
-	// }
+	// https://stackoverflow.com/questions/7850140/how-do-you-create-a-new-instance-of-a-struct-from-its-type-at-run-time-in-go
+	newMap := reflect.MakeMap(rt)
+	val := reflect.ValueOf(value)
+	for _, key := range val.MapKeys() {
+		// fmt.Println("vvv:", key, val.MapIndex(key))
+
+		// @TODO cannot set directly
+		// newMap.SetMapIndex(key, val.MapIndex(key))
+
+		switch v := val.MapIndex(key).Interface().(type) {
+		// case string:
+		// 	newMap.SetMapIndex(key, reflect.ValueOf(v))
+		// case int, int8, int64, float32, float64:
+		// 	newMap.SetMapIndex(key, reflect.ValueOf(v))
+		default:
+			if v == nil {
+				newMap.SetMapIndex(key, reflect.ValueOf(&v).Elem())
+			} else {
+				newMap.SetMapIndex(key, reflect.ValueOf(v))
+			}
+		}
+	}
+
+	rv.Set(newMap)
 
 	return nil
 }
