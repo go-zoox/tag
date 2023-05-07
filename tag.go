@@ -49,7 +49,7 @@ func (t *Tag) decodeR(ptr interface{}, keyPathParent string) error {
 
 		attribute := attribute.New(rtt.Name, rtt.Type.String(), keyPathParent, rtt.Tag.Get(tagName))
 		// fmt.Println("keyPathParent:", keyPathParent, rtt.Name, attribute.GetKey())
-		// fmt.Println("key:", attribute.GetKey())
+		// fmt.Println("keyxxxx:", attribute.GetKey())
 		if err := attribute.SetValue(dataSource.Get(attribute.GetKey())); err != nil {
 			return err
 		}
@@ -271,28 +271,38 @@ func (t *Tag) setValueMap(rt reflect.Type, rv reflect.Value, value any, attribut
 	//	such as map[string]string
 	// https://stackoverflow.com/questions/7850140/how-do-you-create-a-new-instance-of-a-struct-from-its-type-at-run-time-in-go
 	newMap := reflect.MakeMap(rt)
-	val := reflect.ValueOf(value)
-	for _, key := range val.MapKeys() {
+	values := reflect.ValueOf(value)
+	for _, k := range values.MapKeys() {
 		// fmt.Println("vvv:", key, val.MapIndex(key))
 
 		// @TODO cannot set directly
 		// newMap.SetMapIndex(key, val.MapIndex(key))
 
-		switch v := val.MapIndex(key).Interface().(type) {
+		switch v := values.MapIndex(k).Interface().(type) {
 		// case string:
 		// 	newMap.SetMapIndex(key, reflect.ValueOf(v))
 		// case int, int8, int64, float32, float64:
 		// 	newMap.SetMapIndex(key, reflect.ValueOf(v))
 		default:
+			// 1. map => map
 			if v == nil {
-				newMap.SetMapIndex(key, reflect.ValueOf(&v).Elem())
+				newMap.SetMapIndex(k, reflect.ValueOf(&v).Elem())
 			} else {
-				newMap.SetMapIndex(key, reflect.ValueOf(v))
+				// fmt.Println("vvv:", k, v, attribute.GetKey()+"."+k.String())
+				if rt.Elem() == reflect.TypeOf(v) {
+					newMap.SetMapIndex(k, reflect.ValueOf(v))
+				} else {
+					value := reflect.New(rt.Elem())
+					if err := t.decodeR(value.Interface(), attribute.GetKey()+"."+k.String()); err != nil {
+						return fmt.Errorf("%s is not map(%s)", attribute.Key, err.Error())
+					}
+
+					newMap.SetMapIndex(k, value.Elem())
+				}
 			}
 		}
 	}
 
 	rv.Set(newMap)
-
 	return nil
 }

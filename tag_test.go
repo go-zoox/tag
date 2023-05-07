@@ -16,7 +16,20 @@ type TestStruct struct {
 		// Port int64  `custom_struct_tag:"port"`
 		Database string `custom_struct_tag:"database,default=zoox"`
 	} `custom_struct_tag:"redis"`
-	Ports []int64 `custom_struct_tag:"ports"`
+	Ports     []int64             `custom_struct_tag:"ports"`
+	Maps      map[string]string   `custom_struct_tag:"maps"`
+	Providers map[string]Provider `custom_struct_tag:"providers"`
+	Users     []User              `custom_struct_tag:"users"`
+}
+
+type Provider struct {
+	ClientID     string `custom_struct_tag:"client_id"`
+	ClientSecret string `custom_struct_tag:"client_secret"`
+}
+
+type User struct {
+	Name string `custom_struct_tag:"name"`
+	Age  int    `custom_struct_tag:"age"`
 }
 
 type TestStructDataSource struct {
@@ -33,6 +46,34 @@ var TestStructDataSourceData = map[string]interface{}{
 	"ports": []int64{
 		6739,
 		6740,
+	},
+	"maps": map[string]interface{}{
+		"key1": "value1",
+		"key2": "value2",
+	},
+	"providers": map[string]any{
+		"google": map[string]any{
+			"client_id":     "google_client_id",
+			"client_secret": "google_client_secret",
+		},
+		"facebook": map[string]any{
+			"client_id":     "facebook_client_id",
+			"client_secret": "facebook_client_secret",
+		},
+		"github": map[string]any{
+			"client_id":     "github_client_id",
+			"client_secret": "github_client_secret",
+		},
+	},
+	"users": []map[string]any{
+		{
+			"name": "user1",
+			"age":  18,
+		},
+		{
+			"name": "user2",
+			"age":  20,
+		},
 	},
 	"type_transform": "666",
 }
@@ -66,6 +107,74 @@ func TestTag(t *testing.T) {
 
 	if test.Redis.Database != "zoox" {
 		t.Errorf("Redis.Database should be zoox, but got %s", test.Redis.Database)
+	}
+
+	if len(test.Ports) != 2 {
+		t.Fatalf("Ports length must be %d, bug got %d", 2, len(test.Ports))
+	}
+
+	if len(test.Maps) != 2 {
+		t.Fatalf("Maps length must be %d, bug got %d", 2, len(test.Maps))
+	}
+
+	if test.Maps["key1"] != "value1" {
+		t.Fatalf("Maps[key1] must be %s, bug got %s", "value1", test.Maps["key1"])
+	}
+
+	if test.Maps["key2"] != "value2" {
+		t.Fatalf("Maps[key2] must be %s, bug got %s", "value2", test.Maps["key2"])
+	}
+
+	if test.Maps["key3"] != "" {
+		t.Fatalf("Maps[key3] must be %s, bug got %s", "", test.Maps["key3"])
+	}
+
+	if len(test.Providers) != 3 {
+		t.Fatalf("Providers length must be %d, bug got %d", 3, len(test.Providers))
+	}
+
+	if test.Providers["google"].ClientID != "google_client_id" {
+		t.Fatalf("Providers[google].ClientID must be %s, bug got %s", "google_client_id", test.Providers["google"].ClientID)
+	}
+
+	if test.Providers["google"].ClientSecret != "google_client_secret" {
+		t.Fatalf("Providers[google].ClientSecret must be %s, bug got %s", "google_client_secret", test.Providers["google"].ClientSecret)
+	}
+
+	if test.Providers["facebook"].ClientID != "facebook_client_id" {
+		t.Fatalf("Providers[facebook].ClientID must be %s, bug got %s", "facebook_client_id", test.Providers["facebook"].ClientID)
+	}
+
+	if test.Providers["facebook"].ClientSecret != "facebook_client_secret" {
+		t.Fatalf("Providers[facebook].ClientSecret must be %s, bug got %s", "facebook_client_secret", test.Providers["facebook"].ClientSecret)
+	}
+
+	if test.Providers["github"].ClientID != "github_client_id" {
+		t.Fatalf("Providers[github].ClientID must be %s, bug got %s", "github_client_id", test.Providers["github"].ClientID)
+	}
+
+	if test.Providers["github"].ClientSecret != "github_client_secret" {
+		t.Fatalf("Providers[github].ClientSecret must be %s, bug got %s", "github_client_secret", test.Providers["github"].ClientSecret)
+	}
+
+	if len(test.Users) != 2 {
+		t.Fatalf("Users length must be %d, bug got %d", 2, len(test.Users))
+	}
+
+	if test.Users[0].Name != "user1" {
+		t.Fatalf("Users[0].Name must be %s, bug got %s", "user1", test.Users[0].Name)
+	}
+
+	if test.Users[0].Age != 18 {
+		t.Fatalf("Users[0].Age must be %d, bug got %d", 18, test.Users[0].Age)
+	}
+
+	if test.Users[1].Name != "user2" {
+		t.Fatalf("Users[1].Name must be %s, bug got %s", "user2", test.Users[1].Name)
+	}
+
+	if test.Users[1].Age != 20 {
+		t.Fatalf("Users[1].Age must be %d, bug got %d", 20, test.Users[1].Age)
 	}
 }
 
