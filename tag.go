@@ -41,15 +41,8 @@ func (t *Tag) decodeR(ptr interface{}, keyPathParent string) error {
 		rtt := rt.Field(i)
 		rvv := rv.Field(i)
 
-		// xkey := rtt.Name
-		// xalias := rtt.Tag.Get(tagName)
-		// xtype := rtt.Type
-
-		// fmt.Println("typ:", xkey, xalias, xtype.String())
-
 		attribute := attribute.New(rtt.Name, rtt.Type.String(), keyPathParent, rtt.Tag.Get(tagName))
 		// fmt.Println("keyPathParent:", keyPathParent, rtt.Name, attribute.GetKey())
-		// fmt.Println("keyxxxx:", attribute.GetKey())
 		if err := attribute.SetValue(dataSource.Get(attribute.GetKey())); err != nil {
 			return err
 		}
@@ -87,9 +80,7 @@ func (t *Tag) setValue(rt reflect.Type, rv reflect.Value, attribute *attribute.A
 
 	case reflect.Struct:
 		if err := t.decodeR(rv.Addr().Interface(), attribute.GetKey()); err != nil {
-			// return fmt.Errorf("struct decode error at %s: %s", Key, err.Error())
-			// return fmt.Errorf("%s decode error: %s", attribute.GetKey(), err.Error())
-			return err
+			return fmt.Errorf("struct decode error at key %s, expect type(%s) (detail: %s)", attribute.GetKey(), rv.Kind(), err)
 		}
 
 	case reflect.Slice:
