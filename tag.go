@@ -273,34 +273,28 @@ func (t *Tag) setValueMap(rt reflect.Type, rv reflect.Value, value any, attribut
 	newMap := reflect.MakeMap(rt)
 	values := reflect.ValueOf(value)
 	for _, k := range values.MapKeys() {
-		// fmt.Println("vvv:", key, val.MapIndex(key))
+		v := values.MapIndex(k)
+		// fmt.Println("vvv:", k, v, attribute.GetKey()+"."+k.String(), rt.Elem() == v.Elem().Type(), reflect.TypeOf(v.Elem().Interface()))
 
-		// @TODO cannot set directly
-		// newMap.SetMapIndex(key, val.MapIndex(key))
-
-		switch v := values.MapIndex(k).Interface().(type) {
-		// case string:
-		// 	newMap.SetMapIndex(key, reflect.ValueOf(v))
-		// case int, int8, int64, float32, float64:
-		// 	newMap.SetMapIndex(key, reflect.ValueOf(v))
-		default:
-			// 1. map => map
-			if v == nil {
-				newMap.SetMapIndex(k, reflect.ValueOf(&v).Elem())
-			} else {
-				// fmt.Println("vvv:", k, v, attribute.GetKey()+"."+k.String())
-				if rt.Elem() == reflect.TypeOf(v) {
-					newMap.SetMapIndex(k, reflect.ValueOf(v))
-				} else {
-					value := reflect.New(rt.Elem())
-					if err := t.decodeR(value.Interface(), attribute.GetKey()+"."+k.String()); err != nil {
-						return fmt.Errorf("%s is not map(%s)", attribute.Key, err.Error())
-					}
-
-					newMap.SetMapIndex(k, value.Elem())
-				}
-			}
+		// nil
+		if v.IsNil() {
+			newMap.SetMapIndex(k, v.Elem())
+			continue
 		}
+
+		// same type
+		if rt.Elem() == v.Elem().Type() {
+			newMap.SetMapIndex(k, v.Elem())
+			continue
+		}
+
+		// map => struct
+		value := reflect.New(rt.Elem())
+		if err := t.decodeR(value.Interface(), attribute.GetKey()+"."+k.String()); err != nil {
+			return fmt.Errorf("%s is not map(%s)", attribute.Key, err.Error())
+		}
+
+		newMap.SetMapIndex(k, value.Elem())
 	}
 
 	rv.Set(newMap)
