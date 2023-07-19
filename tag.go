@@ -126,6 +126,14 @@ func (t *Tag) setValueInt(rv reflect.Value, value any) error {
 	case float32:
 		rv.SetFloat(float64(v))
 
+	case float64:
+		switch rv.Kind() {
+		case reflect.Uint, reflect.Uint8, reflect.Uint16, reflect.Uint32, reflect.Uint64:
+			rv.SetUint(uint64(v))
+		default:
+			rv.SetInt(int64(v))
+		}
+
 	case int8:
 		switch rv.Kind() {
 		case reflect.Uint, reflect.Uint8, reflect.Uint16, reflect.Uint32, reflect.Uint64:
