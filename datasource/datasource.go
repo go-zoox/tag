@@ -8,5 +8,5 @@ type DataSource interface {
 	//  - Get("port")
 	//  - Get("redis.port")
 	//  - Get("address.city.houses.0.id")
-	Get(key string) any
+	Get(key string) (any, error)
 }

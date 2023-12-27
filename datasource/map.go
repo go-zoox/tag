@@ -15,9 +15,9 @@ func NewMapDataSource(data map[string]any) DataSource {
 // Get returns the value of the given key.
 // key support dot notation.
 // Example:
-//  - Get("port")
-//  - Get("redis.port")
-//  - Get("address.city.houses.0.id")
-func (m *mapDataSource) Get(key string) any {
-	return object.Get(m.data, key)
+//   - Get("port")
+//   - Get("redis.port")
+//   - Get("address.city.houses.0.id")
+func (m *mapDataSource) Get(key string) (any, error) {
+	return object.Get(m.data, key), nil
 }
