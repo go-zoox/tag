@@ -78,8 +78,8 @@ var TestStructDataSourceData = map[string]interface{}{
 	"type_transform": "666",
 }
 
-func (t *TestStructDataSource) Get(key string) (interface{}, error) {
-	return object.Get(TestStructDataSourceData, key), nil
+func (t *TestStructDataSource) Get(key string) any {
+	return object.Get(TestStructDataSourceData, key)
 }
 
 func TestTag(t *testing.T) {

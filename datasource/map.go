@@ -18,6 +18,6 @@ func NewMapDataSource(data map[string]any) DataSource {
 //   - Get("port")
 //   - Get("redis.port")
 //   - Get("address.city.houses.0.id")
-func (m *mapDataSource) Get(key string) (any, error) {
-	return object.Get(m.data, key), nil
+func (m *mapDataSource) Get(key string) any {
+	return object.Get(m.data, key)
 }
