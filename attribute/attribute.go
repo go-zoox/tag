@@ -93,7 +93,7 @@ func (a *Attribute) SetValue(value interface{}) (err error) {
 func (a *Attribute) setValueString(value string) (err error) {
 	// fmt.Println("setValueString:", value, a.GetKey())
 	if strings.Index(a.Type, "struct") != -1 {
-		return fmt.Errorf("type is struct, can't set with string value(%s)", value)
+		return fmt.Errorf("type(key: %s) is struct, can't set with string value(%s)", a.GetKey(), value)
 	}
 
 	// value is empty
@@ -282,13 +282,13 @@ func (a *Attribute) setValueFloat(value float64) (err error) {
 
 // New creates a new Attribute
 //
-// type struct {
-// 	AppName  string `ini:"app_name,omitempty"`
-//  LogLevel string `ini:"log_level,default=DEBUG"`
-//  Secret  string 	`ini:"secret,min=8,max=16"`
-//  Type 		string 	`ini:"type,enum=male|female"`
-//	RegExp  string  `ini:"regexp,regexp=/xxx/"`
-// }
+//	type struct {
+//		AppName  string `ini:"app_name,omitempty"`
+//	 LogLevel string `ini:"log_level,default=DEBUG"`
+//	 Secret  string 	`ini:"secret,min=8,max=16"`
+//	 Type 		string 	`ini:"type,enum=male|female"`
+//		RegExp  string  `ini:"regexp,regexp=/xxx/"`
+//	}
 //
 // key: AppName
 // typ: string
