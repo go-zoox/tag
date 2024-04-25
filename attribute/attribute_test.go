@@ -1,13 +1,14 @@
 package attribute
 
 import (
+	"os"
 	"testing"
 )
 
 func TestEmpty(t *testing.T) {
 	a := New("AppName", "string", "", "")
-	if a.GetKey() != "AppName" {
-		t.Errorf("GetKey() should be AppName, but got %s", a.GetKey())
+	if a.GetKeyPath() != "AppName" {
+		t.Errorf("GetKey() should be AppName, but got %s", a.GetKeyPath())
 	}
 
 	// if a.GetValue() != nil {
@@ -33,8 +34,8 @@ func TestEmpty(t *testing.T) {
 
 func TestAlias(t *testing.T) {
 	a := New("AppName", "string", "", "app_name")
-	if a.GetKey() != "app_name" {
-		t.Errorf("GetKey() should be app_name, but got %s", a.GetKey())
+	if a.GetKeyPath() != "app_name" {
+		t.Errorf("GetKey() should be app_name, but got %s", a.GetKeyPath())
 	}
 
 	// if a.GetValue() != nil {
@@ -60,8 +61,8 @@ func TestAlias(t *testing.T) {
 
 func TestOmitEmpty(t *testing.T) {
 	a := New("AppName", "string", "", "app_name,omitempty")
-	if a.GetKey() != "app_name" {
-		t.Errorf("GetKey() should be app_name, but got %s", a.GetKey())
+	if a.GetKeyPath() != "app_name" {
+		t.Errorf("GetKey() should be app_name, but got %s", a.GetKeyPath())
 	}
 
 	// if a.GetValue() != nil {
@@ -87,8 +88,8 @@ func TestOmitEmpty(t *testing.T) {
 
 func TestRequire(t *testing.T) {
 	a := New("AppName", "string", "", "app_name,required")
-	if a.GetKey() != "app_name" {
-		t.Errorf("GetKey() should be app_name, but got %s", a.GetKey())
+	if a.GetKeyPath() != "app_name" {
+		t.Errorf("GetKey() should be app_name, but got %s", a.GetKeyPath())
 	}
 
 	// if a.GetValue() != nil {
@@ -118,8 +119,8 @@ func TestRequire(t *testing.T) {
 
 func TestDefaultValue(t *testing.T) {
 	a := New("AppName", "string", "", "app_name,default=gozoox")
-	if a.GetKey() != "app_name" {
-		t.Errorf("GetKey() should be app_name, but got %s", a.GetKey())
+	if a.GetKeyPath() != "app_name" {
+		t.Errorf("GetKey() should be app_name, but got %s", a.GetKeyPath())
 	}
 
 	// // should set before call value
@@ -144,10 +145,24 @@ func TestDefaultValue(t *testing.T) {
 	}
 }
 
+func TestEnvValue(t *testing.T) {
+	a := New("AppName", "string", "", "app_name,env=APP_NAME")
+
+	os.Setenv("APP_NAME", "app_name_from_env")
+
+	if err := a.SetValue(""); err != nil {
+		t.Errorf("SetValue() should not return error, but got %s", err)
+	}
+
+	if a.GetValue() != "app_name_from_env" {
+		t.Errorf("GetValue() should be app_name_from_env, but got %s", a.GetValue())
+	}
+}
+
 func TestEnum(t *testing.T) {
 	a := New("AppName", "string", "", "app_name,enum=gozoox|gozoox2")
-	if a.GetKey() != "app_name" {
-		t.Errorf("GetKey() should be app_name, but got %s", a.GetKey())
+	if a.GetKeyPath() != "app_name" {
+		t.Errorf("GetKey() should be app_name, but got %s", a.GetKeyPath())
 	}
 
 	// // should set before call value
@@ -190,8 +205,8 @@ func TestEnum(t *testing.T) {
 
 func TestStringMinMax(t *testing.T) {
 	a := New("Password", "string", "", "password,min=6,max=10")
-	if a.GetKey() != "password" {
-		t.Errorf("GetKey() should be password, but got %s", a.GetKey())
+	if a.GetKeyPath() != "password" {
+		t.Errorf("GetKey() should be password, but got %s", a.GetKeyPath())
 	}
 
 	// // should set before call value
@@ -246,8 +261,8 @@ func TestStringMinMax(t *testing.T) {
 
 func TestNumberMinMax(t *testing.T) {
 	a := New("Age", "int", "", "age,min=3,max=18")
-	if a.GetKey() != "age" {
-		t.Errorf("GetKey() should be age, but got %s", a.GetKey())
+	if a.GetKeyPath() != "age" {
+		t.Errorf("GetKey() should be age, but got %s", a.GetKeyPath())
 	}
 
 	// // should set before call value
@@ -310,8 +325,8 @@ func TestNumberMinMax(t *testing.T) {
 
 func TestRegExp(t *testing.T) {
 	a := New("Email", "string", "", "email,regexp=/^[a-zA-Z0-9_-]+@[a-zA-Z0-9_-]+(\\.[a-zA-Z0-9_-]+)+$/")
-	if a.GetKey() != "email" {
-		t.Errorf("GetKey() should be email, but got %s", a.GetKey())
+	if a.GetKeyPath() != "email" {
+		t.Errorf("GetKey() should be email, but got %s", a.GetKeyPath())
 	}
 
 	// // should set before call value
@@ -342,8 +357,8 @@ func TestRegExp(t *testing.T) {
 
 func TestStringlice(t *testing.T) {
 	a := New("Tags", "[]string", "", "tags")
-	if a.GetKey() != "tags" {
-		t.Errorf("GetKey() should be tags, but got %s", a.GetKey())
+	if a.GetKeyPath() != "tags" {
+		t.Errorf("GetKey() should be tags, but got %s", a.GetKeyPath())
 	}
 
 	if err := a.SetValue("a,b,c"); err != nil {
@@ -374,8 +389,8 @@ func TestStringlice(t *testing.T) {
 
 func TestIntSlice(t *testing.T) {
 	a := New("Tags", "[]int", "", "tags")
-	if a.GetKey() != "tags" {
-		t.Errorf("GetKey() should be tags, but got %s", a.GetKey())
+	if a.GetKeyPath() != "tags" {
+		t.Errorf("GetKey() should be tags, but got %s", a.GetKeyPath())
 	}
 
 	if err := a.SetValue("1,2,3"); err != nil {
@@ -406,8 +421,8 @@ func TestIntSlice(t *testing.T) {
 
 func TestInt64Slice(t *testing.T) {
 	a := New("Tags", "[]int64", "", "tags")
-	if a.GetKey() != "tags" {
-		t.Errorf("GetKey() should be tags, but got %s", a.GetKey())
+	if a.GetKeyPath() != "tags" {
+		t.Errorf("GetKey() should be tags, but got %s", a.GetKeyPath())
 	}
 
 	if err := a.SetValue("1,2,3"); err != nil {
@@ -438,8 +453,8 @@ func TestInt64Slice(t *testing.T) {
 
 func TestFloatSlice(t *testing.T) {
 	a := New("Tags", "[]float64", "", "tags")
-	if a.GetKey() != "tags" {
-		t.Errorf("GetKey() should be tags, but got %s", a.GetKey())
+	if a.GetKeyPath() != "tags" {
+		t.Errorf("GetKey() should be tags, but got %s", a.GetKeyPath())
 	}
 
 	if err := a.SetValue("1.1,2.2,3.3"); err != nil {
@@ -470,8 +485,8 @@ func TestFloatSlice(t *testing.T) {
 
 func TestStringSliceWithCustomSeperator(t *testing.T) {
 	a := New("Tags", "[]string", "", "tags,seperator=;")
-	if a.GetKey() != "tags" {
-		t.Fatalf("GetKey() should be tags, but got %s", a.GetKey())
+	if a.GetKeyPath() != "tags" {
+		t.Fatalf("GetKey() should be tags, but got %s", a.GetKeyPath())
 	}
 
 	if err := a.SetValue("a;b;c"); err != nil {
