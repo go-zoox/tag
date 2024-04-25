@@ -1,4 +1,4 @@
 package tag
 
 // Version is the version of tag.
-var Version = "1.3.1"
+var Version = "1.3.2"
