@@ -339,3 +339,163 @@ func TestRegExp(t *testing.T) {
 		t.Errorf("expect tobewhatwewant@gmail.com, but got %s", a.GetValue())
 	}
 }
+
+func TestStringlice(t *testing.T) {
+	a := New("Tags", "[]string", "", "tags")
+	if a.GetKey() != "tags" {
+		t.Errorf("GetKey() should be tags, but got %s", a.GetKey())
+	}
+
+	if err := a.SetValue("a,b,c"); err != nil {
+		t.Errorf("expect nil, but got %s", err)
+	}
+
+	v, ok := a.GetValue().([]string)
+	if !ok {
+		t.Errorf("expect []string, but got %T", a.GetValue())
+	}
+
+	if len(v) != 3 {
+		t.Errorf("expect 3, but got %d", len(v))
+	}
+
+	if v[0] != "a" {
+		t.Errorf("expect a, but got %s", v[0])
+	}
+
+	if v[1] != "b" {
+		t.Errorf("expect b, but got %s", v[1])
+	}
+
+	if v[2] != "c" {
+		t.Errorf("expect c, but got %s", v[2])
+	}
+}
+
+func TestIntSlice(t *testing.T) {
+	a := New("Tags", "[]int", "", "tags")
+	if a.GetKey() != "tags" {
+		t.Errorf("GetKey() should be tags, but got %s", a.GetKey())
+	}
+
+	if err := a.SetValue("1,2,3"); err != nil {
+		t.Errorf("expect nil, but got %s", err)
+	}
+
+	v, ok := a.GetValue().([]int)
+	if !ok {
+		t.Errorf("expect []int, but got %T", a.GetValue())
+	}
+
+	if len(v) != 3 {
+		t.Errorf("expect 3, but got %d", len(v))
+	}
+
+	if v[0] != 1 {
+		t.Errorf("expect 1, but got %d", v[0])
+	}
+
+	if v[1] != 2 {
+		t.Errorf("expect 2, but got %d", v[1])
+	}
+
+	if v[2] != 3 {
+		t.Errorf("expect 3, but got %d", v[2])
+	}
+}
+
+func TestInt64Slice(t *testing.T) {
+	a := New("Tags", "[]int64", "", "tags")
+	if a.GetKey() != "tags" {
+		t.Errorf("GetKey() should be tags, but got %s", a.GetKey())
+	}
+
+	if err := a.SetValue("1,2,3"); err != nil {
+		t.Errorf("expect nil, but got %s", err)
+	}
+
+	v, ok := a.GetValue().([]int64)
+	if !ok {
+		t.Errorf("expect []int64, but got %T", a.GetValue())
+	}
+
+	if len(v) != 3 {
+		t.Errorf("expect 3, but got %d", len(v))
+	}
+
+	if v[0] != int64(1) {
+		t.Errorf("expect 1, but got %d", v[0])
+	}
+
+	if v[1] != int64(2) {
+		t.Errorf("expect 2, but got %d", v[1])
+	}
+
+	if v[2] != int64(3) {
+		t.Errorf("expect 3, but got %d", v[2])
+	}
+}
+
+func TestFloatSlice(t *testing.T) {
+	a := New("Tags", "[]float64", "", "tags")
+	if a.GetKey() != "tags" {
+		t.Errorf("GetKey() should be tags, but got %s", a.GetKey())
+	}
+
+	if err := a.SetValue("1.1,2.2,3.3"); err != nil {
+		t.Errorf("expect nil, but got %s", err)
+	}
+
+	v, ok := a.GetValue().([]float64)
+	if !ok {
+		t.Errorf("expect []float64, but got %T", a.GetValue())
+	}
+
+	if len(v) != 3 {
+		t.Errorf("expect 3, but got %d", len(v))
+	}
+
+	if v[0] != 1.1 {
+		t.Errorf("expect 1.1, but got %f", v[0])
+	}
+
+	if v[1] != 2.2 {
+		t.Errorf("expect 2.2, but got %f", v[1])
+	}
+
+	if v[2] != 3.3 {
+		t.Errorf("expect 3.3, but got %f", v[2])
+	}
+}
+
+func TestStringSliceWithCustomSeperator(t *testing.T) {
+	a := New("Tags", "[]string", "", "tags,seperator=;")
+	if a.GetKey() != "tags" {
+		t.Fatalf("GetKey() should be tags, but got %s", a.GetKey())
+	}
+
+	if err := a.SetValue("a;b;c"); err != nil {
+		t.Fatalf("expect nil, but got %s", err)
+	}
+
+	v, ok := a.GetValue().([]string)
+	if !ok {
+		t.Fatalf("expect []string, but got %T", a.GetValue())
+	}
+
+	if len(v) != 3 {
+		t.Fatalf("expect 3, but got %d", len(v))
+	}
+
+	if v[0] != "a" {
+		t.Fatalf("expect a, but got %s", v[0])
+	}
+
+	if v[1] != "b" {
+		t.Fatalf("expect b, but got %s", v[1])
+	}
+
+	if v[2] != "c" {
+		t.Fatalf("expect c, but got %s", v[2])
+	}
+}

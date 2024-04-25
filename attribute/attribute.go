@@ -9,15 +9,16 @@ import (
 
 // Attribute return a Attribute created from the given key + type + detail.
 type Attribute struct {
-	Key      string
-	Type     string
-	Alias    string
-	Required bool
-	Default  string
-	Min      float64
-	Max      float64
-	Enum     []string
-	RegExp   string
+	Key       string
+	Type      string
+	Alias     string
+	Required  bool
+	Default   string
+	Min       float64
+	Max       float64
+	Enum      []string
+	RegExp    string
+	Seperator string
 	//
 	Value interface{}
 	//
@@ -93,7 +94,10 @@ func (a *Attribute) SetValue(value interface{}) (err error) {
 func (a *Attribute) setValueString(value string) (err error) {
 	// fmt.Println("setValueString:", value, a.GetKey())
 	if strings.Index(a.Type, "struct") != -1 {
-		return fmt.Errorf("type(key: %s) is struct, can't set with string value(%s)", a.GetKey(), value)
+		// return fmt.Errorf("type(key: %s) is struct, can't set with string value(%s)", a.GetKey(), value)
+
+		// ignore struct
+		return nil
 	}
 
 	// value is empty
@@ -222,7 +226,76 @@ func (a *Attribute) setValueString(value string) (err error) {
 				return fmt.Errorf("%s is not bool", a.Key)
 			}
 		}
+	// slice
+	case "[]string":
+		if value == "" {
+			a.Value = nil
+		} else {
+			if a.Seperator == "" {
+				a.Seperator = ","
+			}
+
+			a.Value = strings.Split(value, a.Seperator)
+		}
+	case "[]int":
+		if value == "" {
+			a.Value = nil
+		} else {
+			if a.Seperator == "" {
+				a.Seperator = ","
+			}
+
+			strs := strings.Split(value, a.Seperator)
+			ints := make([]int, len(strs))
+			for i, v := range strs {
+				ints[i], err = strconv.Atoi(v)
+				if err != nil {
+					return fmt.Errorf("%s is not int", a.Key)
+				}
+			}
+
+			a.Value = ints
+		}
+	case "[]int64":
+		if value == "" {
+			a.Value = nil
+		} else {
+			if a.Seperator == "" {
+				a.Seperator = ","
+			}
+
+			strs := strings.Split(value, a.Seperator)
+			ints := make([]int64, len(strs))
+			for i, v := range strs {
+				ints[i], err = strconv.ParseInt(v, 10, 64)
+				if err != nil {
+					return fmt.Errorf("%s is not int64", a.Key)
+				}
+			}
+
+			a.Value = ints
+		}
+	case "[]float64":
+		if value == "" {
+			a.Value = nil
+		} else {
+			if a.Seperator == "" {
+				a.Seperator = ","
+			}
+
+			strs := strings.Split(value, a.Seperator)
+			floats := make([]float64, len(strs))
+			for i, v := range strs {
+				floats[i], err = strconv.ParseFloat(v, 64)
+				if err != nil {
+					return fmt.Errorf("%s is not float64", a.Key)
+				}
+			}
+
+			a.Value = floats
+		}
 	default:
+		fmt.Println("type:", a.Type)
 		a.Value = nil
 	}
 
@@ -306,6 +379,7 @@ func New(key string, typ string, keyPathParent string, detail string) *Attribute
 	var max float64
 	var enum []string
 	var regexp string
+	var seperator string
 
 	var err error
 
@@ -336,6 +410,15 @@ func New(key string, typ string, keyPathParent string, detail string) *Attribute
 					if len(reparts) == 3 {
 						regexp = reparts[1]
 					}
+				} else if kv[0] == "seperator" {
+					if len(kv) != 2 {
+						panic("seperator must have a value")
+					}
+
+					seperator = kv[1]
+					if seperator == "" {
+						panic("seperator must have a value")
+					}
 				}
 			} else {
 				if alias == "" {
@@ -355,6 +438,7 @@ func New(key string, typ string, keyPathParent string, detail string) *Attribute
 		Max:           max,
 		Enum:          enum,
 		RegExp:        regexp,
+		Seperator:     seperator,
 		KeyPathParent: keyPathParent,
 	}
 }
