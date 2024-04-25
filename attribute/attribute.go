@@ -12,8 +12,11 @@ import (
 
 // Attribute return a Attribute created from the given key + type + detail.
 type Attribute struct {
-	// Key is the key of the attribute.
-	Key string
+	// DataKey is the key of the attribute.
+	DataKey string
+
+	// DataSourceKey is the key of the data source.
+	DataSourceKey string
 
 	// Type is the type of the attribute.
 	Type string
@@ -57,13 +60,18 @@ type Attribute struct {
 	KeyPathParent string
 }
 
-// GetKey returns the key of the attribute.
-func (a *Attribute) GetKey() string {
-	return a.Key
+// GetDataKey returns the key of the attribute.
+func (a *Attribute) GetDataKey() string {
+	return a.DataKey
 }
 
-// GetKeyPath returns the key path of the attribute.
-func (a *Attribute) GetKeyPath() string {
+// GetDataSourceKey returns the key of the attribute.
+func (a *Attribute) GetDataSourceKey() string {
+	return a.DataSourceKey
+}
+
+// GetDataSourceKeyPath returns the key path of the attribute.
+func (a *Attribute) GetDataSourceKeyPath() string {
 	if a.Alias != "" {
 		if a.KeyPathParent != "" {
 			return a.KeyPathParent + "." + a.Alias
@@ -73,10 +81,14 @@ func (a *Attribute) GetKeyPath() string {
 	}
 
 	if a.KeyPathParent != "" {
-		return a.KeyPathParent + "." + a.Key
+		return a.KeyPathParent + "." + a.DataSourceKey
 	}
 
-	return a.Key
+	if a.DataSourceKey != "" {
+		return a.DataSourceKey
+	}
+
+	return a.DataKey
 }
 
 // GetValue returns the value of the attribute.
@@ -147,28 +159,28 @@ func (a *Attribute) setValueString(value string) (err error) {
 		}
 
 		if a.Required {
-			return fmt.Errorf("%s is required", a.GetKeyPath())
+			return fmt.Errorf("%s is required", a.GetDataSourceKeyPath())
 		}
 
 		if a.Enum != nil {
-			return fmt.Errorf("%s must be in enum(%s), but empty", a.GetKeyPath(), strings.Join(a.Enum, "|"))
+			return fmt.Errorf("%s must be in enum(%s), but empty", a.GetDataSourceKeyPath(), strings.Join(a.Enum, "|"))
 		}
 
 		if a.Min != 0 || a.Max != 0 {
 			if a.Type == "string" {
-				return fmt.Errorf("%s must be in range(%d, %d), but empty", a.GetKeyPath(), int(a.Min), int(a.Max))
+				return fmt.Errorf("%s must be in range(%d, %d), but empty", a.GetDataSourceKeyPath(), int(a.Min), int(a.Max))
 			}
 
 			switch a.Type {
 			case "int", "int8", "int16", "int32", "int64", "uint", "uint8", "uint16", "uint32", "uint64":
-				return fmt.Errorf("%s must be in range(%d, %d), but empty", a.GetKeyPath(), int(a.Min), int(a.Max))
+				return fmt.Errorf("%s must be in range(%d, %d), but empty", a.GetDataSourceKeyPath(), int(a.Min), int(a.Max))
 			case "float", "float32", "float64":
-				return fmt.Errorf("%s must be in range(%f, %f), but empty", a.GetKeyPath(), a.Min, a.Max)
+				return fmt.Errorf("%s must be in range(%f, %f), but empty", a.GetDataSourceKeyPath(), a.Min, a.Max)
 			}
 		}
 
 		if a.RegExp != "" {
-			return fmt.Errorf("%s must be matched with regexp(%s), but empty", a.GetKeyPath(), a.RegExp)
+			return fmt.Errorf("%s must be matched with regexp(%s), but empty", a.GetDataSourceKeyPath(), a.RegExp)
 		}
 
 		if a.Value == nil {
@@ -187,7 +199,7 @@ func (a *Attribute) setValueString(value string) (err error) {
 			}
 
 			if !isInEnum {
-				return fmt.Errorf("%s(value: %s)) is not in enum(%s)", a.GetKeyPath(), value, strings.Join(a.Enum, "|"))
+				return fmt.Errorf("%s(value: %s)) is not in enum(%s)", a.GetDataSourceKeyPath(), value, strings.Join(a.Enum, "|"))
 			}
 		}
 
@@ -198,18 +210,18 @@ func (a *Attribute) setValueString(value string) (err error) {
 			switch a.Type {
 			case "string":
 				if valueLen := len(value); valueLen < int(a.Min) || valueLen > int(a.Max) {
-					err = fmt.Errorf("%s must be in range(%d, %d), but %d(value: %s)", a.GetKeyPath(), int(a.Min), int(a.Max), valueLen, value)
+					err = fmt.Errorf("%s must be in range(%d, %d), but %d(value: %s)", a.GetDataSourceKeyPath(), int(a.Min), int(a.Max), valueLen, value)
 				}
 			case "int", "int8", "int16", "int32", "int64", "uint", "uint8", "uint16", "uint32", "uint64", "float", "float32", "float64":
 				valueX, errx := strconv.ParseFloat(value, 64)
 				if errx != nil {
-					err = fmt.Errorf("%s is invalid with min(%f) and max(%f)", a.GetKeyPath(), a.Min, a.Max)
+					err = fmt.Errorf("%s is invalid with min(%f) and max(%f)", a.GetDataSourceKeyPath(), a.Min, a.Max)
 				} else if valueX < a.Min || valueX > a.Max {
 					switch a.Type {
 					case "int", "int8", "int16", "int32", "int64", "uint", "uint8", "uint16", "uint32", "uint64":
-						return fmt.Errorf("%s must be in range(%d, %d), but %d(value: %s)", a.GetKeyPath(), int(a.Min), int(a.Max), int(valueX), value)
+						return fmt.Errorf("%s must be in range(%d, %d), but %d(value: %s)", a.GetDataSourceKeyPath(), int(a.Min), int(a.Max), int(valueX), value)
 					case "float", "float32", "float64":
-						return fmt.Errorf("%s must be in range(%f, %f), but %f(value: %s)", a.GetKeyPath(), a.Min, a.Max, valueX, value)
+						return fmt.Errorf("%s must be in range(%f, %f), but %f(value: %s)", a.GetDataSourceKeyPath(), a.Min, a.Max, valueX, value)
 					}
 				}
 			}
@@ -224,7 +236,7 @@ func (a *Attribute) setValueString(value string) (err error) {
 			if ok, err := regexp.MatchString(a.RegExp, value); err != nil {
 				return err
 			} else if !ok {
-				return fmt.Errorf("%s is invalid with regexp(%s)", a.GetKeyPath(), a.RegExp)
+				return fmt.Errorf("%s is invalid with regexp(%s)", a.GetDataSourceKeyPath(), a.RegExp)
 			}
 		}
 
@@ -244,7 +256,7 @@ func (a *Attribute) setValueString(value string) (err error) {
 		} else {
 			a.Value, err = strconv.ParseFloat(a.Value.(string), 64)
 			if err != nil {
-				return fmt.Errorf("%s is not float", a.Key)
+				return fmt.Errorf("%s is not float", a.DataKey)
 			}
 		}
 	case "int", "int8", "int16", "int32", "int64", "uint", "uint8", "uint16", "uint32", "uint64":
@@ -253,7 +265,7 @@ func (a *Attribute) setValueString(value string) (err error) {
 		} else {
 			a.Value, err = strconv.ParseInt(a.Value.(string), 10, 64)
 			if err != nil {
-				return fmt.Errorf("%s is not int", a.Key)
+				return fmt.Errorf("%s is not int", a.DataKey)
 			}
 		}
 
@@ -263,7 +275,7 @@ func (a *Attribute) setValueString(value string) (err error) {
 		} else {
 			a.Value, err = strconv.ParseBool(a.Value.(string))
 			if err != nil {
-				return fmt.Errorf("%s is not bool", a.Key)
+				return fmt.Errorf("%s is not bool", a.DataKey)
 			}
 		}
 	// slice
@@ -290,7 +302,7 @@ func (a *Attribute) setValueString(value string) (err error) {
 			for i, v := range strs {
 				ints[i], err = strconv.Atoi(v)
 				if err != nil {
-					return fmt.Errorf("%s is not int", a.Key)
+					return fmt.Errorf("%s is not int", a.DataKey)
 				}
 			}
 
@@ -309,7 +321,7 @@ func (a *Attribute) setValueString(value string) (err error) {
 			for i, v := range strs {
 				ints[i], err = strconv.ParseInt(v, 10, 64)
 				if err != nil {
-					return fmt.Errorf("%s is not int64", a.Key)
+					return fmt.Errorf("%s is not int64", a.DataKey)
 				}
 			}
 
@@ -328,7 +340,7 @@ func (a *Attribute) setValueString(value string) (err error) {
 			for i, v := range strs {
 				floats[i], err = strconv.ParseFloat(v, 64)
 				if err != nil {
-					return fmt.Errorf("%s is not float64", a.Key)
+					return fmt.Errorf("%s is not float64", a.DataKey)
 				}
 			}
 
@@ -344,7 +356,7 @@ func (a *Attribute) setValueString(value string) (err error) {
 
 func (a *Attribute) setValueBool(value bool) (err error) {
 	if a.Type != "bool" {
-		return fmt.Errorf("type of %s is not bool", a.GetKeyPath())
+		return fmt.Errorf("type of %s is not bool", a.GetDataSourceKeyPath())
 	}
 
 	if value {
@@ -382,7 +394,7 @@ func (a *Attribute) setValueInt(value int64) (err error) {
 
 	if a.Min != 0 || a.Max != 0 {
 		if float64(value) < a.Min || float64(value) > a.Max {
-			return fmt.Errorf("%s must be in range(%d, %d), but %d", a.GetKeyPath(), int(a.Min), int(a.Max), value)
+			return fmt.Errorf("%s must be in range(%d, %d), but %d", a.GetDataSourceKeyPath(), int(a.Min), int(a.Max), value)
 		}
 	}
 
@@ -412,7 +424,7 @@ func (a *Attribute) setValueFloat(value float64) (err error) {
 
 	if a.Min != 0 || a.Max != 0 {
 		if value < a.Min || value > a.Max {
-			return fmt.Errorf("%s must be in range(%f, %f), but %f", a.GetKeyPath(), a.Min, a.Max, value)
+			return fmt.Errorf("%s must be in range(%f, %f), but %f", a.GetDataSourceKeyPath(), a.Min, a.Max, value)
 		}
 	}
 
@@ -444,15 +456,18 @@ func (a *Attribute) setValueFloat(value float64) (err error) {
 //		RegExp  string  `ini:"regexp,regexp=/xxx/"`
 //	}
 //
-// key: AppName
+// dataKey: AppName
+// dataSourceKey: app_name
 // typ: string
 // detail: "app_name,omitempty"
 //
-// key: LogLevel
+// dataKey: LogLevel
+// dataSourceKey: log_level
 // typ: string
 // detail: "log_level,default=DEBUG"
 func New(key string, typ string, keyPathParent string, detail string) *Attribute {
 	parts := strings.Split(detail, ",")
+	var tag string
 	var alias string
 	var required bool
 	var defaultValue string
@@ -467,6 +482,11 @@ func New(key string, typ string, keyPathParent string, detail string) *Attribute
 
 	if len(parts) > 0 {
 		for _, part := range parts {
+			if tag == "" {
+				tag = part
+				continue
+			}
+
 			if part == "omitempty" {
 				required = false
 			} else if part == "required" {
@@ -493,19 +513,11 @@ func New(key string, typ string, keyPathParent string, detail string) *Attribute
 						regexp = reparts[1]
 					}
 				} else if kv[0] == "seperator" {
-					if len(kv) != 2 {
-						panic("seperator must have a value")
-					}
-
 					seperator = kv[1]
 					if seperator == "" {
 						panic("seperator must have a value")
 					}
 				} else if kv[0] == "env" {
-					if len(kv) != 2 {
-						panic("env must have a value")
-					}
-
 					env = kv[1]
 				}
 			} else {
@@ -517,7 +529,8 @@ func New(key string, typ string, keyPathParent string, detail string) *Attribute
 	}
 
 	return &Attribute{
-		Key:           key,
+		DataKey:       key,
+		DataSourceKey: tag,
 		Type:          typ,
 		Alias:         alias,
 		Required:      required,

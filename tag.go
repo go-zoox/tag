@@ -42,8 +42,7 @@ func (t *Tag) decodeR(ptr interface{}, keyPathParent string) error {
 		rvv := rv.Field(i)
 
 		attribute := attribute.New(rtt.Name, rtt.Type.String(), keyPathParent, rtt.Tag.Get(tagName))
-		// fmt.Println("keyPathParent:", keyPathParent, rtt.Name, attribute.GetKey())
-		if err := attribute.SetValue(dataSource.Get(attribute.GetKeyPath())); err != nil {
+		if err := attribute.SetValue(dataSource.Get(attribute.GetDataSourceKeyPath(), attribute.GetDataSourceKey())); err != nil {
 			return err
 		}
 
@@ -78,17 +77,17 @@ func (t *Tag) setValue(rt reflect.Type, rv reflect.Value, attribute *attribute.A
 
 	case reflect.Int64, reflect.Int, reflect.Int8, reflect.Int16, reflect.Int32:
 		if err := t.setValueInt(rv, value); err != nil {
-			return fmt.Errorf("setValueInt error at key %s, expect type(%s) (detail: %s)", attribute.GetKeyPath(), rv.Kind(), err)
+			return fmt.Errorf("setValueInt error at key %s, expect type(%s) (detail: %s)", attribute.GetDataSourceKeyPath(), rv.Kind(), err)
 		}
 
 	case reflect.Float64, reflect.Float32:
 		if err := t.setValueFloat(rv, value); err != nil {
-			return fmt.Errorf("setValueFloat error at key %s, expect type(%s) (detail: %s)", attribute.GetKeyPath(), rv.Kind(), err)
+			return fmt.Errorf("setValueFloat error at key %s, expect type(%s) (detail: %s)", attribute.GetDataSourceKeyPath(), rv.Kind(), err)
 		}
 
 	case reflect.Struct:
-		if err := t.decodeR(rv.Addr().Interface(), attribute.GetKeyPath()); err != nil {
-			return fmt.Errorf("struct decode error at key %s, expect type(%s) (detail: %s)", attribute.GetKeyPath(), rv.Kind(), err)
+		if err := t.decodeR(rv.Addr().Interface(), attribute.GetDataSourceKeyPath()); err != nil {
+			return fmt.Errorf("struct decode error at key %s, expect type(%s) (detail: %s)", attribute.GetDataSourceKeyPath(), rv.Kind(), err)
 		}
 
 	case reflect.Slice:
@@ -103,11 +102,11 @@ func (t *Tag) setValue(rt reflect.Type, rv reflect.Value, attribute *attribute.A
 
 	case reflect.Uint, reflect.Uint8, reflect.Uint16, reflect.Uint32, reflect.Uint64:
 		if err := t.setValueInt(rv, value); err != nil {
-			return fmt.Errorf("setValueInt error at key %s, expect type(%s) (detail: %s)", attribute.GetKeyPath(), rv.Kind(), err)
+			return fmt.Errorf("setValueInt error at key %s, expect type(%s) (detail: %s)", attribute.GetDataSourceKeyPath(), rv.Kind(), err)
 		}
 
 	default:
-		return fmt.Errorf("type(%s) is not supported at %s, fatal err", rv.Kind(), attribute.GetKeyPath())
+		return fmt.Errorf("type(%s) is not supported at %s, fatal err", rv.Kind(), attribute.GetDataSourceKeyPath())
 	}
 
 	return nil
@@ -256,8 +255,8 @@ func (t *Tag) setValueSlice(rt reflect.Type, rv reflect.Value, value any, attrib
 			rv.Set(reflect.Append(rv, reflect.ValueOf(int64(v))))
 		default:
 			value := reflect.New(rt.Elem())
-			if err := t.decodeR(reflect.Value(value).Interface(), attribute.GetKeyPath()+"."+strconv.Itoa(index)); err != nil {
-				return fmt.Errorf("%s is not slice(%s)", attribute.Key, err.Error())
+			if err := t.decodeR(reflect.Value(value).Interface(), attribute.GetDataSourceKeyPath()+"."+strconv.Itoa(index)); err != nil {
+				return fmt.Errorf("%s is not slice(%s)", attribute.DataKey, err.Error())
 			}
 
 			// j, _ := json.MarshalIndent(value.Elem().Interface(), "", "  ")
@@ -297,8 +296,8 @@ func (t *Tag) setValueMap(rt reflect.Type, rv reflect.Value, value any, attribut
 
 		// map => struct
 		value := reflect.New(rt.Elem())
-		if err := t.decodeR(value.Interface(), attribute.GetKeyPath()+"."+k.String()); err != nil {
-			return fmt.Errorf("%s is not map(%s)", attribute.Key, err.Error())
+		if err := t.decodeR(value.Interface(), attribute.GetDataSourceKeyPath()+"."+k.String()); err != nil {
+			return fmt.Errorf("%s is not map(%s)", attribute.DataKey, err.Error())
 		}
 
 		newMap.SetMapIndex(k, value.Elem())
