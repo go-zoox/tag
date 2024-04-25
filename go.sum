@@ -1,6 +1,6 @@
 github.com/frankban/quicktest v1.14.3 h1:FJKSZTDHjyhriyC81FLQ0LY93eSai0ZyR/ZIkd3ZUKE=
-github.com/go-zoox/core-utils v1.3.5 h1:uxnPjUdo20ZCYCJp+1deuoqdMByTTJxQFrMp8e5ty+E=
-github.com/go-zoox/core-utils v1.3.5/go.mod h1:raOOwr2l2sJQyjR0Dg33sg0ry4U1/L2eNTuLFRpUXWs=
+github.com/go-zoox/core-utils v1.4.7 h1:CXVeGNF8l0V68mE9XU4qWHB4WqEx+mTDfWJ0kWiI4FM=
+github.com/go-zoox/core-utils v1.4.7/go.mod h1:raOOwr2l2sJQyjR0Dg33sg0ry4U1/L2eNTuLFRpUXWs=
 github.com/go-zoox/testify v1.0.2 h1:G5sQ3xm0uwCuytnMhgnqZ5BItCt2DN3n2wLBqlIJEWA=
 github.com/google/go-cmp v0.5.7 h1:81/ik6ipDQS2aGcBfIN5dHDB36BwrStyeAQquSYCV4o=
 github.com/kr/pretty v0.3.0 h1:WgNl7dwNpEZ6jJ9k1snq4pZsg7DOEN8hP9Xw0Tsjwk0=
