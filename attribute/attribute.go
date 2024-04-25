@@ -6,6 +6,8 @@ import (
 	"regexp"
 	"strconv"
 	"strings"
+
+	"github.com/go-zoox/core-utils/cast"
 )
 
 // Attribute return a Attribute created from the given key + type + detail.
@@ -345,7 +347,21 @@ func (a *Attribute) setValueBool(value bool) (err error) {
 		return fmt.Errorf("type of %s is not bool", a.GetKeyPath())
 	}
 
-	a.Value = value
+	if value {
+		a.Value = value
+	} else {
+		var vv string
+		if a.Default != "" {
+			vv = a.Default
+		}
+		if a.Env != "" {
+			vv = os.Getenv(a.Env)
+		}
+
+		if vv != "" {
+			a.Value = cast.ToBool(vv)
+		}
+	}
 
 	return nil
 }
@@ -370,7 +386,21 @@ func (a *Attribute) setValueInt(value int64) (err error) {
 		}
 	}
 
-	a.Value = value
+	if value != 0 {
+		a.Value = value
+	} else {
+		var vv string
+		if a.Default != "" {
+			vv = a.Default
+		}
+		if a.Env != "" {
+			vv = os.Getenv(a.Env)
+		}
+
+		if vv != "" {
+			a.Value = cast.ToInt(vv)
+		}
+	}
 
 	return nil
 }
@@ -386,8 +416,21 @@ func (a *Attribute) setValueFloat(value float64) (err error) {
 		}
 	}
 
-	a.Value = value
+	if value != 0 {
+		a.Value = value
+	} else {
+		var vv string
+		if a.Default != "" {
+			vv = a.Default
+		}
+		if a.Env != "" {
+			vv = os.Getenv(a.Env)
+		}
 
+		if vv != "" {
+			a.Value = cast.ToFloat64(vv)
+		}
+	}
 	return nil
 }
 
