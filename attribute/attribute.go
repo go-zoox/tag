@@ -347,7 +347,7 @@ func (a *Attribute) setValueString(value string) (err error) {
 			a.Value = floats
 		}
 	default:
-		fmt.Println("type:", a.Type)
+		// fmt.Println("type:", a.Type)
 		a.Value = nil
 	}
 
