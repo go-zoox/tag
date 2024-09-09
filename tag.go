@@ -56,16 +56,17 @@ func (t *Tag) decodeR(ptr interface{}, keyPathParent string) error {
 
 func (t *Tag) setValue(rt reflect.Type, rv reflect.Value, attribute *attribute.Attribute) error {
 	value := attribute.GetValue()
+	// if data source value is nil, should not set the value
 	if value == nil {
-		// return nil
+		return nil
 
-		// @TODO if value is nil, create a new instance of the type
-		// this action cause the struct data can be setted in recursively
-		if attribute.Value == nil {
-			attribute.Value = reflect.New(rt).Elem().Interface()
-		}
+		// // @TODO if value is nil, create a new instance of the type
+		// // this action cause the struct data can be setted in recursively
+		// if attribute.Value == nil {
+		// 	attribute.Value = reflect.New(rt).Elem().Interface()
+		// }
 
-		value = attribute.GetValue()
+		// value = attribute.GetValue()
 	}
 
 	switch rv.Kind() {
@@ -206,7 +207,7 @@ func (t *Tag) setValueInt(rv reflect.Value, value any) error {
 		}
 
 	default:
-		return fmt.Errorf("setValueInt unknown value type: %s", reflect.TypeOf(value).Kind())
+		return fmt.Errorf("setValueInt unknown value(%v) type: %s", value, reflect.TypeOf(value).Kind())
 	}
 
 	return nil

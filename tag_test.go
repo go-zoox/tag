@@ -2,6 +2,7 @@ package tag
 
 import (
 	"testing"
+	"time"
 
 	"github.com/go-zoox/core-utils/object"
 )
@@ -20,6 +21,8 @@ type TestStruct struct {
 	Maps      map[string]string   `custom_struct_tag:"maps"`
 	Providers map[string]Provider `custom_struct_tag:"providers"`
 	Users     []User              `custom_struct_tag:"users"`
+	//
+	MaxAge time.Duration
 }
 
 type Provider struct {
@@ -86,7 +89,7 @@ func TestTag(t *testing.T) {
 	var test TestStruct
 	tag := New("custom_struct_tag", &TestStructDataSource{})
 	if err := tag.Decode(&test); err != nil {
-		t.Error(err)
+		t.Fatal(err)
 	}
 
 	if test.AppName != "gozoox" {
