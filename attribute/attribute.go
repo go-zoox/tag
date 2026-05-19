@@ -10,10 +10,6 @@ import (
 	"github.com/go-zoox/core-utils/cast"
 )
 
-func isBoolType(typ string) bool {
-	return typ == "bool" || typ == "*bool"
-}
-
 // Attribute return a Attribute created from the given key + type + detail.
 type Attribute struct {
 	// DataKey is the key of the attribute.
@@ -109,12 +105,19 @@ func (a *Attribute) SetValue(value interface{}) (err error) {
 	if value == nil {
 		if a.Default != "" {
 			value = a.Default
-		} else {
-			if strings.Contains(a.Type, "struct") {
-				//
-			} else {
-				value = ""
+		} else if strings.Contains(a.Type, "struct") {
+			//
+		} else if isScalarPointer(a.Type) {
+			if !a.isValueSetted {
+				a.isValueSetted = true
 			}
+			if a.Required {
+				return fmt.Errorf("%s is required", a.GetDataSourceKeyPath())
+			}
+			a.Value = nil
+			return nil
+		} else {
+			value = ""
 		}
 	}
 
@@ -251,42 +254,59 @@ func (a *Attribute) setValueString(value string) (err error) {
 	}
 
 	// Correct the value by type
-	switch a.Type {
+	bt := baseType(a.Type)
+	isPtr := isScalarPointer(a.Type)
+
+	switch bt {
 	case "string":
-		// do nothing
-	case "float64":
+		// keep string as-is (including "" for *string)
+	case "float64", "float32":
 		if a.Value == "" {
-			a.Value = float64(0)
+			if isPtr {
+				a.Value = nil
+			} else {
+				a.Value = float64(0)
+			}
 		} else {
 			a.Value, err = strconv.ParseFloat(a.Value.(string), 64)
 			if err != nil {
 				return fmt.Errorf("%s is not float", a.DataKey)
 			}
 		}
-	case "int", "int8", "int16", "int32", "int64", "uint", "uint8", "uint16", "uint32", "uint64":
-		if a.Value == "" {
-			a.Value = int64(0)
-		} else {
-			a.Value, err = strconv.ParseInt(a.Value.(string), 10, 64)
-			if err != nil {
-				return fmt.Errorf("%s is not int", a.DataKey)
-			}
-		}
-
-	case "bool", "*bool":
-		if a.Value == "" {
-			if a.Type == "*bool" {
-				a.Value = nil
+	default:
+		if isIntBaseType(bt) {
+			if a.Value == "" {
+				if isPtr {
+					a.Value = nil
+				} else {
+					a.Value = int64(0)
+				}
 			} else {
-				a.Value = false
+				a.Value, err = strconv.ParseInt(a.Value.(string), 10, 64)
+				if err != nil {
+					return fmt.Errorf("%s is not int", a.DataKey)
+				}
 			}
-		} else {
-			a.Value, err = strconv.ParseBool(a.Value.(string))
-			if err != nil {
-				return fmt.Errorf("%s is not bool", a.DataKey)
-			}
+			break
 		}
-	// slice
+		if bt == "bool" {
+			if a.Value == "" {
+				if isPtr {
+					a.Value = nil
+				} else {
+					a.Value = false
+				}
+			} else {
+				a.Value, err = strconv.ParseBool(a.Value.(string))
+				if err != nil {
+					return fmt.Errorf("%s is not bool", a.DataKey)
+				}
+			}
+			break
+		}
+	}
+
+	switch a.Type {
 	case "[]string":
 		if value == "" {
 			a.Value = nil
@@ -355,8 +375,9 @@ func (a *Attribute) setValueString(value string) (err error) {
 			a.Value = floats
 		}
 	default:
-		// fmt.Println("type:", a.Type)
-		a.Value = nil
+		if !strings.HasPrefix(a.Type, "[]") && bt != "string" && !isIntBaseType(bt) && !isFloatBaseType(bt) && bt != "bool" {
+			a.Value = nil
+		}
 	}
 
 	return nil
@@ -365,6 +386,11 @@ func (a *Attribute) setValueString(value string) (err error) {
 func (a *Attribute) setValueBool(value bool) (err error) {
 	if !isBoolType(a.Type) {
 		return fmt.Errorf("type of %s is not bool", a.GetDataSourceKeyPath())
+	}
+
+	if isScalarPointer(a.Type) {
+		a.Value = value
+		return nil
 	}
 
 	if value {
@@ -409,6 +435,11 @@ func (a *Attribute) setValueInt(value int64) (err error) {
 		}
 	}
 
+	if isScalarPointer(a.Type) {
+		a.Value = value
+		return nil
+	}
+
 	if value != 0 {
 		a.Value = value
 	} else {
@@ -437,6 +468,11 @@ func (a *Attribute) setValueFloat(value float64) (err error) {
 		if value < a.Min || value > a.Max {
 			return fmt.Errorf("%s must be in range(%f, %f), but %f", a.GetDataSourceKeyPath(), a.Min, a.Max, value)
 		}
+	}
+
+	if isScalarPointer(a.Type) {
+		a.Value = value
+		return nil
 	}
 
 	if value != 0 {

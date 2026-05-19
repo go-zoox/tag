@@ -258,58 +258,190 @@ func TestStringEnum(t *testing.T) {
 	}
 }
 
-func TestPointerBool(t *testing.T) {
-	type Host struct {
-		Rewrite *bool `custom_struct_tag:"rewrite"`
+func TestPointerScalarsFloatAndUint(t *testing.T) {
+	type Opt struct {
+		Weight *float64 `custom_struct_tag:"weight"`
+		Code   *uint32  `custom_struct_tag:"code"`
 	}
 	type Config struct {
-		Host Host `custom_struct_tag:"host"`
+		Opt Opt `custom_struct_tag:"opt"`
 	}
 
-	ds := &struct {
-		data map[string]any
-	}{data: map[string]any{
-		"host": map[string]any{
-			"rewrite": true,
+	ds := &pointerScalarDataSource{data: map[string]any{
+		"opt": map[string]any{
+			"weight": 2.5,
+			"code":   uint32(7),
 		},
 	}}
 
-	getter := &pointerBoolDataSource{ds: ds}
 	var cfg Config
-	if err := New("custom_struct_tag", getter).Decode(&cfg); err != nil {
+	if err := New("custom_struct_tag", ds).Decode(&cfg); err != nil {
 		t.Fatal(err)
 	}
-	if cfg.Host.Rewrite == nil || !*cfg.Host.Rewrite {
-		t.Fatalf("expected rewrite true, got %v", cfg.Host.Rewrite)
+	if cfg.Opt.Weight == nil || *cfg.Opt.Weight != 2.5 {
+		t.Fatalf("weight: %v", cfg.Opt.Weight)
+	}
+	if cfg.Opt.Code == nil || *cfg.Opt.Code != 7 {
+		t.Fatalf("code: %v", cfg.Opt.Code)
 	}
 
-	ds.data["host"] = map[string]any{"rewrite": false}
-	var cfgFalse Config
-	if err := New("custom_struct_tag", getter).Decode(&cfgFalse); err != nil {
+	ds.data["opt"] = map[string]any{"weight": 0.0, "code": uint32(0)}
+	var zero Config
+	if err := New("custom_struct_tag", ds).Decode(&zero); err != nil {
 		t.Fatal(err)
 	}
-	if cfgFalse.Host.Rewrite == nil || *cfgFalse.Host.Rewrite {
-		t.Fatalf("expected rewrite false, got %v", cfgFalse.Host.Rewrite)
+	if zero.Opt.Weight == nil || *zero.Opt.Weight != 0 {
+		t.Fatalf("weight zero: %v", zero.Opt.Weight)
 	}
-
-	ds.data["host"] = map[string]any{}
-	var cfgOmit Config
-	if err := New("custom_struct_tag", getter).Decode(&cfgOmit); err != nil {
-		t.Fatal(err)
-	}
-	if cfgOmit.Host.Rewrite != nil {
-		t.Fatalf("expected rewrite nil when omitted, got %v", cfgOmit.Host.Rewrite)
+	if zero.Opt.Code == nil || *zero.Opt.Code != 0 {
+		t.Fatalf("code zero: %v", zero.Opt.Code)
 	}
 }
 
-type pointerBoolDataSource struct {
-	ds *struct {
-		data map[string]any
+func TestPointerScalarsPartialOmit(t *testing.T) {
+	type Opt struct {
+		Flag *bool `custom_struct_tag:"flag"`
+		Port *int  `custom_struct_tag:"port"`
+	}
+	type Config struct {
+		Opt Opt `custom_struct_tag:"opt"`
+	}
+
+	ds := &pointerScalarDataSource{data: map[string]any{
+		"opt": map[string]any{"port": 3000},
+	}}
+
+	var cfg Config
+	if err := New("custom_struct_tag", ds).Decode(&cfg); err != nil {
+		t.Fatal(err)
+	}
+	if cfg.Opt.Flag != nil {
+		t.Fatalf("flag should be nil, got %v", cfg.Opt.Flag)
+	}
+	if cfg.Opt.Port == nil || *cfg.Opt.Port != 3000 {
+		t.Fatalf("port: %v", cfg.Opt.Port)
 	}
 }
 
-func (p *pointerBoolDataSource) Get(path, key string) any {
-	return object.Get(p.ds.data, path)
+func TestPointerScalarTopLevel(t *testing.T) {
+	type Config struct {
+		Enabled *bool `custom_struct_tag:"enabled"`
+	}
+	ds := &pointerScalarDataSource{data: map[string]any{"enabled": true}}
+
+	var cfg Config
+	if err := New("custom_struct_tag", ds).Decode(&cfg); err != nil {
+		t.Fatal(err)
+	}
+	if cfg.Enabled == nil || !*cfg.Enabled {
+		t.Fatalf("enabled: %v", cfg.Enabled)
+	}
+}
+
+func TestPointerScalarsStringCoercion(t *testing.T) {
+	type Opt struct {
+		Port *int     `custom_struct_tag:"port"`
+		Flag *bool    `custom_struct_tag:"flag"`
+		Rate *float64 `custom_struct_tag:"rate"`
+	}
+	type Config struct {
+		Opt Opt `custom_struct_tag:"opt"`
+	}
+
+	ds := &pointerScalarDataSource{data: map[string]any{
+		"opt": map[string]any{
+			"port": "8080",
+			"flag": "false",
+			"rate": "1.25",
+		},
+	}}
+
+	var cfg Config
+	if err := New("custom_struct_tag", ds).Decode(&cfg); err != nil {
+		t.Fatal(err)
+	}
+	if cfg.Opt.Port == nil || *cfg.Opt.Port != 8080 {
+		t.Fatalf("port: %v", cfg.Opt.Port)
+	}
+	if cfg.Opt.Flag == nil || *cfg.Opt.Flag {
+		t.Fatalf("flag: %v", cfg.Opt.Flag)
+	}
+	if cfg.Opt.Rate == nil || *cfg.Opt.Rate != 1.25 {
+		t.Fatalf("rate: %v", cfg.Opt.Rate)
+	}
+}
+
+func TestPointerScalars(t *testing.T) {
+	type Opt struct {
+		Flag *bool   `custom_struct_tag:"flag"`
+		Port *int    `custom_struct_tag:"port"`
+		Rate *int64  `custom_struct_tag:"rate"`
+		Note *string `custom_struct_tag:"note"`
+	}
+	type Config struct {
+		Opt Opt `custom_struct_tag:"opt"`
+	}
+
+	ds := &pointerScalarDataSource{data: map[string]any{
+		"opt": map[string]any{
+			"flag": true,
+			"port": 8080,
+			"rate": int64(99),
+			"note": "ok",
+		},
+	}}
+
+	var cfg Config
+	if err := New("custom_struct_tag", ds).Decode(&cfg); err != nil {
+		t.Fatal(err)
+	}
+	if cfg.Opt.Flag == nil || !*cfg.Opt.Flag {
+		t.Fatalf("flag: %v", cfg.Opt.Flag)
+	}
+	if cfg.Opt.Port == nil || *cfg.Opt.Port != 8080 {
+		t.Fatalf("port: %v", cfg.Opt.Port)
+	}
+	if cfg.Opt.Rate == nil || *cfg.Opt.Rate != 99 {
+		t.Fatalf("rate: %v", cfg.Opt.Rate)
+	}
+	if cfg.Opt.Note == nil || *cfg.Opt.Note != "ok" {
+		t.Fatalf("note: %v", cfg.Opt.Note)
+	}
+
+	ds.data["opt"] = map[string]any{"flag": false, "port": 0, "rate": int64(0), "note": ""}
+	var zero Config
+	if err := New("custom_struct_tag", ds).Decode(&zero); err != nil {
+		t.Fatal(err)
+	}
+	if zero.Opt.Flag == nil || *zero.Opt.Flag {
+		t.Fatalf("flag zero: %v", zero.Opt.Flag)
+	}
+	if zero.Opt.Port == nil || *zero.Opt.Port != 0 {
+		t.Fatalf("port zero: %v", zero.Opt.Port)
+	}
+	if zero.Opt.Rate == nil || *zero.Opt.Rate != 0 {
+		t.Fatalf("rate zero: %v", zero.Opt.Rate)
+	}
+	if zero.Opt.Note == nil || *zero.Opt.Note != "" {
+		t.Fatalf("note zero: %v", zero.Opt.Note)
+	}
+
+	ds.data["opt"] = map[string]any{}
+	var omit Config
+	if err := New("custom_struct_tag", ds).Decode(&omit); err != nil {
+		t.Fatal(err)
+	}
+	if omit.Opt.Flag != nil || omit.Opt.Port != nil || omit.Opt.Rate != nil || omit.Opt.Note != nil {
+		t.Fatalf("expected all nil when omitted, got %+v", omit.Opt)
+	}
+}
+
+type pointerScalarDataSource struct {
+	data map[string]any
+}
+
+func (p *pointerScalarDataSource) Get(path, key string) any {
+	return object.Get(p.data, path)
 }
 
 func TestTypeTransform(t *testing.T) {
