@@ -258,6 +258,60 @@ func TestStringEnum(t *testing.T) {
 	}
 }
 
+func TestPointerBool(t *testing.T) {
+	type Host struct {
+		Rewrite *bool `custom_struct_tag:"rewrite"`
+	}
+	type Config struct {
+		Host Host `custom_struct_tag:"host"`
+	}
+
+	ds := &struct {
+		data map[string]any
+	}{data: map[string]any{
+		"host": map[string]any{
+			"rewrite": true,
+		},
+	}}
+
+	getter := &pointerBoolDataSource{ds: ds}
+	var cfg Config
+	if err := New("custom_struct_tag", getter).Decode(&cfg); err != nil {
+		t.Fatal(err)
+	}
+	if cfg.Host.Rewrite == nil || !*cfg.Host.Rewrite {
+		t.Fatalf("expected rewrite true, got %v", cfg.Host.Rewrite)
+	}
+
+	ds.data["host"] = map[string]any{"rewrite": false}
+	var cfgFalse Config
+	if err := New("custom_struct_tag", getter).Decode(&cfgFalse); err != nil {
+		t.Fatal(err)
+	}
+	if cfgFalse.Host.Rewrite == nil || *cfgFalse.Host.Rewrite {
+		t.Fatalf("expected rewrite false, got %v", cfgFalse.Host.Rewrite)
+	}
+
+	ds.data["host"] = map[string]any{}
+	var cfgOmit Config
+	if err := New("custom_struct_tag", getter).Decode(&cfgOmit); err != nil {
+		t.Fatal(err)
+	}
+	if cfgOmit.Host.Rewrite != nil {
+		t.Fatalf("expected rewrite nil when omitted, got %v", cfgOmit.Host.Rewrite)
+	}
+}
+
+type pointerBoolDataSource struct {
+	ds *struct {
+		data map[string]any
+	}
+}
+
+func (p *pointerBoolDataSource) Get(path, key string) any {
+	return object.Get(p.ds.data, path)
+}
+
 func TestTypeTransform(t *testing.T) {
 	var test struct {
 		TypeTransform       int64  `custom_struct_tag:"type_transform"`

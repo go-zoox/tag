@@ -106,6 +106,12 @@ func (t *Tag) setValue(rt reflect.Type, rv reflect.Value, attribute *attribute.A
 			return fmt.Errorf("setValueInt error at key %s, expect type(%s) (detail: %s)", attribute.GetDataSourceKeyPath(), rv.Kind(), err)
 		}
 
+	case reflect.Ptr:
+		if rv.IsNil() {
+			rv.Set(reflect.New(rt.Elem()))
+		}
+		return t.setValue(rt.Elem(), rv.Elem(), attribute)
+
 	default:
 		return fmt.Errorf("type(%s) is not supported at %s, fatal err", rv.Kind(), attribute.GetDataSourceKeyPath())
 	}

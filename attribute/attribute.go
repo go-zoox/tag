@@ -10,6 +10,10 @@ import (
 	"github.com/go-zoox/core-utils/cast"
 )
 
+func isBoolType(typ string) bool {
+	return typ == "bool" || typ == "*bool"
+}
+
 // Attribute return a Attribute created from the given key + type + detail.
 type Attribute struct {
 	// DataKey is the key of the attribute.
@@ -269,9 +273,13 @@ func (a *Attribute) setValueString(value string) (err error) {
 			}
 		}
 
-	case "bool":
+	case "bool", "*bool":
 		if a.Value == "" {
-			a.Value = false
+			if a.Type == "*bool" {
+				a.Value = nil
+			} else {
+				a.Value = false
+			}
 		} else {
 			a.Value, err = strconv.ParseBool(a.Value.(string))
 			if err != nil {
@@ -355,24 +363,27 @@ func (a *Attribute) setValueString(value string) (err error) {
 }
 
 func (a *Attribute) setValueBool(value bool) (err error) {
-	if a.Type != "bool" {
+	if !isBoolType(a.Type) {
 		return fmt.Errorf("type of %s is not bool", a.GetDataSourceKeyPath())
 	}
 
 	if value {
 		a.Value = value
-	} else {
-		var vv string
-		if a.Default != "" {
-			vv = a.Default
-		}
-		if a.Env != "" {
-			vv = os.Getenv(a.Env)
-		}
+		return nil
+	}
 
-		if vv != "" {
-			a.Value = cast.ToBool(vv)
-		}
+	var vv string
+	if a.Default != "" {
+		vv = a.Default
+	}
+	if a.Env != "" {
+		vv = os.Getenv(a.Env)
+	}
+
+	if vv != "" {
+		a.Value = cast.ToBool(vv)
+	} else {
+		a.Value = false
 	}
 
 	return nil
